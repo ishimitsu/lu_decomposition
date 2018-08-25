@@ -10,7 +10,7 @@ int *init_matrix(int row, int line) {
 	return matrix;
 }
 
-void free_square_matrix(int **matrix) {
+void free_square_matrix(int *matrix) {
 	free(matrix);
 }
 
