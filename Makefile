@@ -1,12 +1,16 @@
 CC = gcc
+SRC_DIR = src
+SRCS = $(SRC_DIR)/main.c
+OBJS = $(SRCS:.c=.o) 
+TARGET = lu_decompositon
 
-all:
-	${CC} -c main.c
-#	${CC} -c string.c
-#	${CC} -o main main.o string.o
-	${CC} -o lu_decompositon main.o
-	chmod u+x lu_decompositon
-	./lu_decompositon
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) -o $@ $^
+
+$(BUILD_DIR)/%.o: %.c
+	$(CC) -c -o $@ $<
 
 clean:
-	rm -f *.o
+	rm -rf $(OBJS) $(TARGET)
