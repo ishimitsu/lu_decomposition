@@ -8,21 +8,20 @@
 #define BUF_LEN 1024
 
 struct matrix {
-	int row;
-	int line;
+	int length;
 	int *matrix;
 } typedef MATRIX;
 
-extern int *init_matrix(int row, int line);
+extern int *init_square_matrix(int length);
 extern void free_square_matrix(int *matrix);
-extern int get_matrix_elements(int *matrix, char *input, int now_line, int max_row);
-extern int lu_decomposition (int *matrix, int row_max, int line_max);
+extern int get_matrix_elements(int *matrix, char *input, int now_line, int matrix_length);
+extern int lu_decomposition (int *matrix, int matrix_length);
 
-MATRIX *make_matrix (char *filename) {
+MATRIX *make_square_matrix (char *filename) {
 	FILE *fp;
 	char input[BUF_LEN];
-	int row, line;
-	int now_input_line = 0;
+	int square_matrix_length;
+	int now_line = 0;
 	int now_matrix_line = 0;
 	int *input_matrix;
 	MATRIX *ret;
@@ -34,41 +33,37 @@ MATRIX *make_matrix (char *filename) {
 
 	while( fgets(input, sizeof(input), fp) != NULL) {
 
-		if(now_input_line == 0) {
-			line = atoi(input);
-
-		} else if(now_input_line == 1) {
-			row = atoi(input);
-
+		if(now_line == 0 && square_matrix_length == 0) {
 			// initialize square matrix
-			input_matrix = init_matrix(row, line);
+			square_matrix_length = atoi(input);
+			input_matrix = init_square_matrix(square_matrix_length);
 
 		} else {
+			// Add elements to square matrix
+			if(now_matrix_line < square_matrix_length) {
 
-			if(now_matrix_line < line) {
-
-				if( !(get_matrix_elements(input_matrix, input, now_matrix_line, row)) ) {
+				if( !(get_matrix_elements(input_matrix, input, 
+							  now_matrix_line, square_matrix_length)) ) {
 					printf("Invalid Matrix\n");
 					return NULL;
 				}
 				
 			} else {
 				printf("Max Matrix Line is %d, so line %d is ignored\n",
-				       line, now_matrix_line);
+				       square_matrix_length, now_matrix_line);
 			}
-			
+
 			now_matrix_line++;
 
 		}
 
-		now_input_line++;
+		now_line++;
 	}
 
 	fclose(fp);
 
 	ret = memset(malloc(sizeof(MATRIX)), 0, sizeof(MATRIX));
-	ret->row = row;
-	ret->line = line;
+	ret->length = square_matrix_length;
 	ret->matrix = input_matrix;
 
 	return ret;
@@ -77,15 +72,15 @@ MATRIX *make_matrix (char *filename) {
 int main(void) {
 	MATRIX *input_matrix;
 
-	if( (input_matrix = make_matrix(INPUT_MATRIX)) == NULL) {
+	if( (input_matrix = make_square_matrix(INPUT_MATRIX)) == NULL) {
 		return -1;
 	}
 
 #ifdef DBG_PRINT
-	printf("Input Matrix : row %d, line %d\n", input_matrix->row, input_matrix->line);
-	for(int i = 0; i < input_matrix->line; i++) {
-		for(int j = 0; j < input_matrix->row; j++) {
-			printf("%d ", input_matrix->matrix[i * input_matrix->row + j]);
+	printf("Input %d Length Square Matrix\n", input_matrix->length);
+	for(int i = 0; i < input_matrix->length; i++) {
+		for(int j = 0; j < input_matrix->length; j++) {
+			printf("%d ", input_matrix->matrix[i * input_matrix->length + j]);
 		}
 		printf("\n");
 	}
