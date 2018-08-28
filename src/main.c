@@ -1,98 +1,57 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#define DBG_PRINT 1
+#include "common.h"
 
 #define INPUT_MATRIX "input_matrix.txt"
-#define BUF_LEN 1024
 
-struct matrix {
-  int length;
-  int *matrix;
-} typedef MATRIX;
-
-extern int *init_square_matrix(int length);
-extern void free_square_matrix(int *matrix);
-extern int get_matrix_elements(int *matrix, char *input, int now_line, int matrix_length);
-extern int *get_inverse_matrix (int *matrix_a, int matrix_length);
-
-MATRIX *make_square_matrix (char *filename) {
-  FILE *fp;
-  char input[BUF_LEN];
-  int square_matrix_length;
-  int now_line = 0;
-  int now_matrix_line = 0;
-  int *input_matrix;
-  MATRIX *ret;
-
-  if ( (fp = fopen(INPUT_MATRIX, "r") ) == NULL ) {
-    printf("Error: Open %s\n", INPUT_MATRIX);
-    return NULL;
-  }
-
-  while( fgets(input, sizeof(input), fp) != NULL) {
-
-    if(now_line == 0 && square_matrix_length == 0) {
-      // initialize square matrix
-      square_matrix_length = atoi(input);
-      input_matrix = init_square_matrix(square_matrix_length);
-
-    } else {
-      // Add elements to square matrix
-      if(now_matrix_line < square_matrix_length) {
-
-	if( !(get_matrix_elements(input_matrix, input, 
-				  now_matrix_line, square_matrix_length)) ) {
-	  printf("Invalid Matrix\n");
-	  return NULL;
-	}
-				
-      } else {
-	printf("Max Matrix Line is %d, so line %d is ignored\n",
-	       square_matrix_length, now_matrix_line);
-      }
-
-      now_matrix_line++;
-
-    }
-
-    now_line++;
-  }
-
-  fclose(fp);
-
-  ret = memset(malloc(sizeof(MATRIX)), 0, sizeof(MATRIX));
-  ret->length = square_matrix_length;
-  ret->matrix = input_matrix;
-
-  return ret;
-}
+extern int *malloc_square_matrix(int length);
+extern void free_all_malloc_matrix(void);
+extern int get_input_matrix_length (char *filename);
+extern int get_input_square_matrix (char *filename, int *matrix_a, int matrix_length);
+extern int get_lu_decomposition_matrix(int *matrix_a, int *matrix_l, int *matrix_u, int matrix_length);
+extern int get_inverse_matrix_with_lu_decomp (int *matrix_l, int *matrix_u, int *matrix_a_inv, int length);
 
 int main(void) {
-  MATRIX *input_matrix;
-  int *inverse_matrix;
+  int matrix_length;
+  int *matrix_a, *matrix_l, *matrix_u, *matrix_a_inv;
 
-  if( (input_matrix = make_square_matrix(INPUT_MATRIX)) == NULL) {
-    return -1;
+  if( (matrix_length = get_input_matrix_length(INPUT_MATRIX)) == 0) {
+    printf("Invalid Matrix Length %d\n", matrix_length);
+    goto end;
   }
 
-#ifdef DBG_PRINT
-  printf("Input %d Length Square Matrix\n", input_matrix->length);
-  for(int i = 0; i < input_matrix->length; i++) {
-    for(int j = 0; j < input_matrix->length; j++) {
-      printf("%d ", input_matrix->matrix[i * input_matrix->length + j]);
-    }
-    printf("\n");
+  matrix_a = malloc_square_matrix(matrix_length);
+  if( !get_input_square_matrix(INPUT_MATRIX, matrix_a, matrix_length) ) {
+    printf("Failed Get Input Matrix\n");
+    goto end;
   }
-  printf("\n");
+
+#if DBG_PRINT_INPUT_MATRIX == 1
+  printf("Matrix A\n");
+  print_matrix(matrix_a, matrix_length);
 #endif
 
-  inverse_matrix = get_inverse_matrix (input_matrix->matrix, input_matrix->length);
+  matrix_l = malloc_square_matrix(matrix_length);
+  matrix_u = malloc_square_matrix(matrix_length);
+  if( !get_lu_decomposition_matrix(matrix_a, matrix_l, matrix_u, matrix_length) ) {
+    printf("Failed LU Decomposition\n");
+    goto end;
+  }
 
-  free_square_matrix(inverse_matrix);
-  free_square_matrix(input_matrix->matrix);
-  free(input_matrix);
+#if DBG_PRINT_LU_MATRIX == 1
+  printf("Matrix L\n");
+  print_matrix(matrix_l, matrix_length);
+
+  printf("Matrix U\n");
+  print_matrix(matrix_u, matrix_length);
+#endif
+
+  matrix_a_inv = malloc_square_matrix(matrix_length);
+  if (!get_inverse_matrix_with_lu_decomp (matrix_l, matrix_u, matrix_a_inv, matrix_length) ) {
+    printf("Failed Inverse MATRIX A\n");
+    goto end;
+  }
+
+ end:
+  free_all_malloc_matrix();
 
   return 0;
 }

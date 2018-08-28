@@ -1,6 +1,6 @@
 CC = gcc
 SRC_DIR = src
-SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/matrix.c $(SRC_DIR)/lu_decomposition.c
+SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/matrix.c $(SRC_DIR)/lu_decomposition.c $(SRC_DIR)/inverse_matrix.c $(SRC_DIR)/dbg_print.c
 OBJS = $(SRCS:.c=.o) 
 TARGET = lu_decompositon
 
