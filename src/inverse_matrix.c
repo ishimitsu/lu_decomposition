@@ -1,6 +1,5 @@
 #include "common.h"
-
-extern int *malloc_square_matrix(int length);
+#include "matrix.h"
 
 int check_matrix_is_inverse (int *matrix, int *matrix_inv, int matrix_length) {
   int *matrix_e;

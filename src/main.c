@@ -1,17 +1,11 @@
 #include "common.h"
+#include "matrix.h"
 
 #define INPUT_MATRIX "input_matrix.txt"
 
-extern int *malloc_square_matrix(int length);
-extern void free_all_malloc_matrix(void);
-extern int get_input_matrix_length (char *filename);
-extern int get_input_square_matrix (char *filename, int *matrix_a, int matrix_length);
 extern int get_lu_decomposition_matrix(int *matrix_a, int *matrix_l, int *matrix_u, int matrix_length);
 extern int get_inverse_matrix_with_lu_decomp (int *matrix_l, int *matrix_u, int *matrix_a_inv, int length);
-
-#if CHECK_A_INV_RESULT == 1
 extern int check_matrix_is_inverse (int *matrix, int *matrix_inv, int matrix_length);
-#endif
 
 int main(void) {
   int matrix_length;

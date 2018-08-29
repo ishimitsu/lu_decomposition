@@ -1,5 +1,9 @@
 #include "common.h"
 
+int get_pivot_selection () {
+  return 0;
+}
+
 // To LU decomposition, use Doolittle method
 int get_lu_decomposition_matrix(int *matrix_a, int *matrix_l, int *matrix_u, int matrix_length) {
   int sum = 0;
