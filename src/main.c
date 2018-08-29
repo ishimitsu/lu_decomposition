@@ -9,6 +9,10 @@ extern int get_input_square_matrix (char *filename, int *matrix_a, int matrix_le
 extern int get_lu_decomposition_matrix(int *matrix_a, int *matrix_l, int *matrix_u, int matrix_length);
 extern int get_inverse_matrix_with_lu_decomp (int *matrix_l, int *matrix_u, int *matrix_a_inv, int length);
 
+#if CHECK_A_INV_RESULT == 1
+extern int check_matrix_is_inverse (int *matrix, int *matrix_inv, int matrix_length);
+#endif
+
 int main(void) {
   int matrix_length;
   int *matrix_a, *matrix_l, *matrix_u, *matrix_a_inv;
@@ -36,19 +40,21 @@ int main(void) {
     goto end;
   }
 
-#if DBG_PRINT_LU_MATRIX == 1
-  printf("Matrix L\n");
-  print_matrix(matrix_l, matrix_length);
-
-  printf("Matrix U\n");
-  print_matrix(matrix_u, matrix_length);
-#endif
-
   matrix_a_inv = malloc_square_matrix(matrix_length);
   if (!get_inverse_matrix_with_lu_decomp (matrix_l, matrix_u, matrix_a_inv, matrix_length) ) {
     printf("Failed Inverse MATRIX A\n");
     goto end;
   }
+
+  printf("Inversed A Matrix\n");
+  print_matrix(matrix_a_inv, matrix_length);
+
+#if CHECK_A_INV_RESULT == 1
+  if (!check_matrix_is_inverse (matrix_a, matrix_a_inv, matrix_length) ) {
+    printf("Invalid Inverse A Matrix\n");
+    goto end;
+  }
+#endif
 
  end:
   free_all_malloc_matrix();

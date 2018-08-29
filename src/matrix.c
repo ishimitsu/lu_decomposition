@@ -111,7 +111,6 @@ int get_matrix_elements(int *matrix, char *input, int now_line, int matrix_lengt
 int get_input_square_matrix (char *filename, int *matrix_a, int matrix_length) {
   FILE *fp;
   char buf[BUF_LEN];
-  int square_matrix_length;
   int now_line = 0;
   int now_matrix_line = 0;
 
@@ -132,8 +131,8 @@ int get_input_square_matrix (char *filename, int *matrix_a, int matrix_length) {
 	}
 				
       } else {
-	printf("Matrix Length is %d, so line %d is ignored\n",
-	       square_matrix_length, now_matrix_line);
+	printf("Matrix Length is %d, so line %d [%s] is ignored\n",
+	       matrix_length, now_matrix_line, buf);
       }
       now_matrix_line++;
 
@@ -147,3 +146,24 @@ int get_input_square_matrix (char *filename, int *matrix_a, int matrix_length) {
   return 1;
 }
 
+// Check M1 * M2 = Comp_M or not
+int compare_matrix_multi (int *matrix_1, int *matrix_2, 
+			  int *comp_matrix, int matrix_length) {
+  int sum = 0;
+
+  for(int i = 0; i < matrix_length; i++) {
+    for(int j = 0; j < matrix_length; j++) {
+      sum = 0;
+
+      for(int k = 0; k < matrix_length; k++)
+	sum += matrix_1[i * matrix_length + k] * matrix_2[k * matrix_length + j];
+
+      if(sum != comp_matrix[i * matrix_length + j]) {
+	return 0;
+      }
+
+    }
+  }
+
+  return 1;
+}

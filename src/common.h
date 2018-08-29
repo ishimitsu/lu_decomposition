@@ -2,15 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DBG_PRINT 1
+#define BUF_LEN 1024
 
 extern void print_matrix(int *matrix, int matrix_length);
+extern int compare_matrix_multi (int *matrix_1, int *matrix_2, 
+				 int *comp_matrix, int matrix_length);
 
+
+#define DBG_PRINT 1
 #if DBG_PRINT == 1
 #define DBG_PRINT_INPUT_MATRIX 1
 #define DBG_PRINT_LU_MATRIX 1
 #define DBG_PRINT_LU_INV_MATRIX 1
 #endif
 
-
-#define BUF_LEN 1024
+#define CHECK_LU_DECOMP_RESULT 1
+#define CHECK_LU_INV_RESULT 1
+#define CHECK_A_INV_RESULT 1
