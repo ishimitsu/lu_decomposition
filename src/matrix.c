@@ -18,8 +18,13 @@ double *malloc_square_matrix(int length) {
 }
 
 void free_all_malloc_matrix (void) {
-  for(int i = 0; i < malloc_matrix_cnt; i++) {
-    free (malloc_matrix_list[i]);
+
+  if(malloc_matrix_cnt > 0) {
+
+    for(int i = 0; i < malloc_matrix_cnt; i++) {
+      free (malloc_matrix_list[i]);
+    }
+
   }
 }
 
@@ -37,6 +42,7 @@ int get_input_matrix_length (char *filename) {
 
   for (int i = 0; i < strlen(buf) && buf[i] != '\0' && buf[i] != '\n'; i++) {
     if(!isdigit(buf[i])) {
+      printf("Invalid Matrix Length [%s]\n", buf);
       return 0;
     }
   }
@@ -49,62 +55,117 @@ int get_input_matrix_length (char *filename) {
 }
 
 
-int split_string_to_int(char *target, char *split, double *ret, int ret_size) {
+// return element count in line
+int get_matrix_element_cnt(char *line, char *split) {
   char *p;
-  int i = 1;
+  int ret = 0;
+  char *target;
 
-  p = strtok(target, split);
+  target = malloc (sizeof(char) * strlen(line));
+  strncpy (target, line, strlen(line));
 
-  for (int i = 0; i < strlen(p) && p[i] != '\0' && p[i] != '\n'; i++) {
-    if(!isdigit(p[i])) {
-      printf("Invalid Element %s\n", p);
-      return 0;
-    }
+  if ( (p = strtok(target, split) ) != NULL)
+    ret++;
+
+  while( p != NULL) {
+    if ( (p = strtok(NULL, split) ) != NULL)
+      ret++;
   }
 
-  ret[0] = atof(p);
+  free(target);
 
+  return ret;
+}
+
+
+int get_matrix_element_from_line(char *line, char *split, double *elements, int element_cnt) {
+  int ret = 1;
+  char *p;
+  int cnt, decimal_point;
+  char *target;
+
+  target = malloc (sizeof(char) * strlen(line));
+  strncpy (target, line, strlen(line));
+
+  p = strtok(target, split);
+  decimal_point = 0;
+  for (int i = 0; i < strlen(p) && p[i] != '\0' && p[i] != '\n'; i++) {
+
+    if( i == 0 && p[i] == '-') {
+    } else if(p[i] == '.' && !decimal_point) {
+      decimal_point++;
+    } else {
+      if(!isdigit(p[i])) {
+	ret = 0;
+	printf("Invalid Element %s\n", p);
+	goto end;
+      }
+    }
+    
+  }
+  elements[0] = atof(p);
+
+  cnt = 1;
   while( p != NULL) {
     p = strtok(NULL, split);
     
     if(p != NULL) {
 
+      decimal_point = 0;
       for (int i = 0; i < strlen(p) && p[i] != '\0' && p[i] != '\n'; i++) {
-	if(!isdigit(p[i])) {
-	  printf("Invalid Element %s\n", p);
-	  return 0;
+
+	if( i == 0 && p[i] == '-') {
+	} else if(p[i] == '.' && !decimal_point) {
+	  decimal_point++;
+	} else {
+	  if(!isdigit(p[i])) {
+	    ret = 0;
+	    printf("Invalid Element %s\n", p);
+	    goto end;
+	  }
 	}
+	
       }
 
-      if(i > ret_size) {
+      if(cnt > element_cnt) {
 	printf("Too Many Element\n");
-	return 0;
+	ret = 0;
+	goto end;
       }
 
-      ret[i] = atof(p);
-      i++;
+      elements[cnt] = atof(p);
+      cnt++;
     }
   }
 
-  return 1;
+ end: 
+  free(target);
+
+  return ret;
 }
 
 int get_matrix_elements(double *matrix, char *input, int now_line, int matrix_length) {
-  double *int_array;
+  double *elements;
+  int element_cnt;
 
-  int_array = malloc(sizeof(int) * matrix_length);
-  memset(int_array, 0, sizeof(int) * matrix_length);
+  if( (element_cnt = get_matrix_element_cnt (input, " ")) != matrix_length) {
+    printf("Matrix Line-%d [%s] total elements=[%d] is Invalid\n", now_line, input, element_cnt);
+    return 0;
+  }
 
-  if ( !(split_string_to_int (input, " ", int_array, matrix_length)) ) {
-    printf("Invalid Matrix Element %s\n", input);
+  elements = calloc(matrix_length, sizeof(double));
+
+  if ( !(get_matrix_element_from_line (input, " ", elements, matrix_length)) ) {
+    printf("Matrix Line-%d [%s] includes Invalid elements\n", now_line, input);
+    free(elements);
     return 0;
   }
 
   for(int i = 0; i < matrix_length; i++) {
-    matrix[now_line * matrix_length + i] = int_array[i];
+    matrix[now_line * matrix_length + i] = elements[i];
   }
 
-  free(int_array);
+  free(elements);
 	
   return 1;
 }
@@ -115,6 +176,7 @@ int get_input_square_matrix (char *filename, double *matrix_a, int matrix_length
   char buf[BUF_LEN];
   int now_line = 0;
   int now_matrix_line = 0;
+  int ret = 1;
 
   if ( (fp = fopen(filename, "r") ) == NULL ) {
     printf("Error: Open %s\n", filename);
@@ -124,17 +186,17 @@ int get_input_square_matrix (char *filename, double *matrix_a, int matrix_length
   while( fgets(buf, sizeof(buf), fp) != NULL) {
 
     if(now_line > 0) { 
-      // Add elements to square matrix
+      // skip line0, it checked at get_input_matrix_length()
+
       if(now_matrix_line < matrix_length) {
 
 	if( !(get_matrix_elements(matrix_a, buf, now_matrix_line, matrix_length)) ) {
-	  printf("Invalid Matrix\n");
 	  return 0;
 	}
 				
       } else {
-	printf("Matrix Length is %d, so line %d [%s] is ignored\n",
-	       matrix_length, now_matrix_line, buf);
+	// Too many rows, Invalid Matrix 
+	break;
       }
       now_matrix_line++;
 
@@ -143,9 +205,14 @@ int get_input_square_matrix (char *filename, double *matrix_a, int matrix_length
     now_line++;
   }
 
+  if(now_matrix_line != matrix_length) {
+    printf("Number of Matrix Line = [%d] is Invalid, needs [%d] Line\n ", now_matrix_line, matrix_length);
+    ret = 0;
+  }
+
   fclose(fp);
 
-  return 1;
+  return ret;
 }
 
 // Check M1 * M2 = Comp_M or not

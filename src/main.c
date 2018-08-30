@@ -10,9 +10,10 @@ extern int check_matrix_is_inverse (double *matrix, double *matrix_inv, int matr
 int main(void) {
   int matrix_length;
   double *matrix_a, *matrix_l, *matrix_u, *matrix_a_inv;
+  char *input_matrix_file = INPUT_MATRIX;
 
-  if( (matrix_length = get_input_matrix_length(INPUT_MATRIX)) == 0) {
-    printf("Invalid Matrix Length %d\n", matrix_length);
+  if( !(matrix_length = get_input_matrix_length(input_matrix_file)) ) {
+    printf("Failed Get Matrix Length from %s\n", input_matrix_file);
     goto end;
   }
 
