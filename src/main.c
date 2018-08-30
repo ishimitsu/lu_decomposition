@@ -3,13 +3,13 @@
 
 #define INPUT_MATRIX "input_matrix.txt"
 
-extern int get_lu_decomposition_matrix(int *matrix_a, int *matrix_l, int *matrix_u, int matrix_length);
-extern int get_inverse_matrix_with_lu_decomp (int *matrix_l, int *matrix_u, int *matrix_a_inv, int length);
-extern int check_matrix_is_inverse (int *matrix, int *matrix_inv, int matrix_length);
+extern int get_lu_decomposition_matrix(double *matrix_a, double *matrix_l, double *matrix_u, int matrix_length);
+extern int get_inverse_matrix_with_lu_decomp (double *matrix_l, double *matrix_u, double *matrix_a_inv, int length);
+extern int check_matrix_is_inverse (double *matrix, double *matrix_inv, int matrix_length);
 
 int main(void) {
   int matrix_length;
-  int *matrix_a, *matrix_l, *matrix_u, *matrix_a_inv;
+  double *matrix_a, *matrix_l, *matrix_u, *matrix_a_inv;
 
   if( (matrix_length = get_input_matrix_length(INPUT_MATRIX)) == 0) {
     printf("Invalid Matrix Length %d\n", matrix_length);
@@ -44,10 +44,12 @@ int main(void) {
   print_matrix(matrix_a_inv, matrix_length);
 
 #if CHECK_A_INV_RESULT == 1
+  printf("Check A * A_INV = A_INV * A = E ... ");
   if (!check_matrix_is_inverse (matrix_a, matrix_a_inv, matrix_length) ) {
-    printf("Invalid Inverse A Matrix\n");
+    printf("NG\n");
     goto end;
   }
+  printf("OK \n");
 #endif
 
  end:

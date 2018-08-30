@@ -1,12 +1,12 @@
 #include "common.h"
 #include "matrix.h"
 
-int check_matrix_is_inverse (int *matrix, int *matrix_inv, int matrix_length) {
-  int *matrix_e;
+int check_matrix_is_inverse (double *matrix, double *matrix_inv, int matrix_length) {
+  double *matrix_e;
   int ret = 1;
 
-  matrix_e = malloc ( sizeof(int *) * matrix_length * matrix_length);
-  memset (matrix_e, 0, sizeof(int *) * matrix_length * matrix_length);
+  matrix_e = calloc ( matrix_length * matrix_length, sizeof(int));
+
   for(int i = 0; i < matrix_length; i++) {
     matrix_e[i * matrix_length + i] = 1;
   }
@@ -27,46 +27,57 @@ int check_matrix_is_inverse (int *matrix, int *matrix_inv, int matrix_length) {
 }
 
 
-int get_lu_inverse_matrix (int *matrix_l, int *matrix_u, int *matrix_l_inv, int *matrix_u_inv, int matrix_length) {
-  int detL, detU;
-  int sum = 0;
+int get_lu_inverse_matrix (double *matrix_l, double *matrix_u, double *matrix_l_inv, double *matrix_u_inv, int matrix_length) {
+  double detL, detU;
+  double sum, pivot;
 
-  // detLU only need diagonal element, other elements should be 0
+  // detLU only need diagonal numer, other numers should be 0
   detL = 1;
   detU = 1;
   for(int i = 0; i < matrix_length; i++) {
     detU *= matrix_u[matrix_length * i + i];
   }
   if (detU == 0) {
-    printf("detU = 0, so U doesn't have inverse Matrix\n");
+    printf("detU = 0, so Matrix A doesn't have inverse Matrix\n");
     return 0;
   }
 
   for(int i = 0; i < matrix_length; i++) {
+
+    // L (i,i) always 1, so no need pivot select
+    pivot = matrix_l[i * matrix_length + i]; 
+    if(pivot != 1) {
+      printf("L(%d %d) = %f, Invalid Lower Triangle Matrix\n", i, i, pivot);
+      return 0;
+    }
+
     for(int j = 0; j < i; j++) {
 
       sum = 0;
       // SUM = L(i, j) * L_INV(j, j)) + ... + L(i, i-1) * L_INV(i-1, j)
       for(int k = j; k < i; k++)
 	sum += matrix_l[i * matrix_length + k] * matrix_l_inv[k * matrix_length + j];
-	
-      // L_INV = - (SUM / L (i, i))
-      matrix_l_inv[i * matrix_length + j] = - (sum / matrix_l[i * matrix_length + i]);
+
+      // L_INV = - (SUM / L (i, i)) = -1 * SUM
+      matrix_l_inv[i * matrix_length + j] = - (sum / pivot);
       
     }
 
-    // i == j (L_INV Diagonal elements = 1, so L_INV doesn't need pivot)
-    matrix_l_inv[i * matrix_length + i] = 1 / matrix_l[i * matrix_length + i];
+    // i == j (L_INV(i, i) diagonal numer always 1)
+    matrix_l_inv[i * matrix_length + i] = 1 / pivot;
   }
 
 
   for(int i = matrix_length-1; i >= 0; i--) {
 
-    // i == j, need pivot
-    matrix_u_inv[i * matrix_length + i] = 1 / matrix_u[i * matrix_length + i];
+    pivot = matrix_u[i * matrix_length + i];
+    if(!pivot) {
+      // if U diagonal element = 0, need pivot selection
+      printf("U[%d %d] is 0, need pivot selection\n", i, i);
+    }
 
-    if(matrix_u[i * matrix_length + i] != 1 && matrix_u[i * matrix_length + i] != -1)
-      printf("U_INV[%d %d] = %d, Need pivot\n", i, i, matrix_u[i * matrix_length + i]);
+    // i == j (U_INV diagonal numer) = 1 / U (i, i)
+    matrix_u_inv[i * matrix_length + i] = 1 / pivot;
 
     // for(int j = i+1; j < matrix_length; j++) {
     for(int j = matrix_length-1; j >= i+1; j--) {
@@ -77,8 +88,9 @@ int get_lu_inverse_matrix (int *matrix_l, int *matrix_u, int *matrix_l_inv, int 
 	sum += matrix_u[i * matrix_length + k] * matrix_u_inv[k * matrix_length + j];
       }
 
-      // L_INV = - (SUM / L (i, i))
-      matrix_u_inv[i * matrix_length + j] = - (sum / matrix_u[i * matrix_length + i]);
+      // U_INV = - (SUM / U (i, i))
+      matrix_u_inv[i * matrix_length + j] = - (sum / pivot);
+
     }
   }
 
@@ -86,8 +98,8 @@ int get_lu_inverse_matrix (int *matrix_l, int *matrix_u, int *matrix_l_inv, int 
 
 }
 
-int get_inverse_matrix_with_lu_decomp (int *matrix_l, int *matrix_u, int *matrix_a_inv, int matrix_length) {
-  int *matrix_l_inv, *matrix_u_inv;
+int get_inverse_matrix_with_lu_decomp (double *matrix_l, double *matrix_u, double *matrix_a_inv, int matrix_length) {
+  double *matrix_l_inv, *matrix_u_inv;
 
   matrix_l_inv = malloc_square_matrix(matrix_length);
   matrix_u_inv = malloc_square_matrix(matrix_length);
@@ -106,15 +118,20 @@ int get_inverse_matrix_with_lu_decomp (int *matrix_l, int *matrix_u, int *matrix
 #endif 
 
 #if CHECK_LU_INV_RESULT == 1
+  printf("Check L * L_INV = L_INV * L = E ... ");
   if (!check_matrix_is_inverse (matrix_l, matrix_l_inv, matrix_length) ) {
-    printf("Failed Inverse L Matrix\n");
+    printf("NG\n");
     return 0;
   }
+  printf("OK \n");
 
+  printf("Check U * U_INV = U_INV * U = E ... ");
   if (!check_matrix_is_inverse (matrix_u, matrix_u_inv, matrix_length) ) {
-    printf("Failed Inverse U Matrix\n");
+    printf("NG\n");
     return 0;
   }
+  printf("OK\n");
+  printf("\n");
 #endif
 
   // Inverse A = Inverse U * Inverse L 

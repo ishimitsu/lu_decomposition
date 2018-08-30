@@ -1,13 +1,15 @@
 #include "common.h"
+#include "matrix.h"
 #include <ctype.h>
+#include <math.h>
 
-int *malloc_matrix_list[64] ={0};
+double *malloc_matrix_list[64] ={0};
 int malloc_matrix_cnt = 0;
 
-int *malloc_square_matrix(int length) {
-  int *matrix;
-  matrix = malloc ( sizeof(int *) * length * length);
-  memset (matrix, 0, sizeof(int *) *  length * length);
+double *malloc_square_matrix(int length) {
+  double *matrix;
+
+  matrix = calloc ( length * length, sizeof(double) );
 
   malloc_matrix_list[malloc_matrix_cnt] = matrix;
   malloc_matrix_cnt++;
@@ -47,7 +49,7 @@ int get_input_matrix_length (char *filename) {
 }
 
 
-int split_string_to_int(char *target, char *split, int *ret, int ret_size) {
+int split_string_to_int(char *target, char *split, double *ret, int ret_size) {
   char *p;
   int i = 1;
 
@@ -60,7 +62,7 @@ int split_string_to_int(char *target, char *split, int *ret, int ret_size) {
     }
   }
 
-  ret[0] = atoi(p);
+  ret[0] = atof(p);
 
   while( p != NULL) {
     p = strtok(NULL, split);
@@ -79,7 +81,7 @@ int split_string_to_int(char *target, char *split, int *ret, int ret_size) {
 	return 0;
       }
 
-      ret[i] = atoi(p);
+      ret[i] = atof(p);
       i++;
     }
   }
@@ -87,8 +89,8 @@ int split_string_to_int(char *target, char *split, int *ret, int ret_size) {
   return 1;
 }
 
-int get_matrix_elements(int *matrix, char *input, int now_line, int matrix_length) {
-  int *int_array;
+int get_matrix_elements(double *matrix, char *input, int now_line, int matrix_length) {
+  double *int_array;
 
   int_array = malloc(sizeof(int) * matrix_length);
   memset(int_array, 0, sizeof(int) * matrix_length);
@@ -108,7 +110,7 @@ int get_matrix_elements(int *matrix, char *input, int now_line, int matrix_lengt
 }
 
 
-int get_input_square_matrix (char *filename, int *matrix_a, int matrix_length) {
+int get_input_square_matrix (char *filename, double *matrix_a, int matrix_length) {
   FILE *fp;
   char buf[BUF_LEN];
   int now_line = 0;
@@ -147,9 +149,8 @@ int get_input_square_matrix (char *filename, int *matrix_a, int matrix_length) {
 }
 
 // Check M1 * M2 = Comp_M or not
-int compare_matrix_multi (int *matrix_1, int *matrix_2, 
-			  int *comp_matrix, int matrix_length) {
-  int sum = 0;
+int compare_matrix_multi (double *matrix_1, double *matrix_2, double *comp_matrix, int matrix_length) {
+  double sum = 0;
 
   for(int i = 0; i < matrix_length; i++) {
     for(int j = 0; j < matrix_length; j++) {
@@ -166,4 +167,24 @@ int compare_matrix_multi (int *matrix_1, int *matrix_2,
   }
 
   return 1;
+}
+
+
+void print_matrix(double *matrix, int matrix_length) {
+  double element, integer, fraction;
+
+  for(int i = 0; i < matrix_length; i++) {
+    for(int j = 0; j < matrix_length; j++) {
+      element = matrix[i * matrix_length + j];
+      fraction = modf (element, &integer);
+      if(fraction == 0)
+	printf("%.0f ", element);
+      else
+	printf("%.4f ", element);
+      
+    }
+    printf("\n");
+  }
+  printf("\n");
+
 }
