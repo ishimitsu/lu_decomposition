@@ -12,13 +12,14 @@ int main(void) {
   double *matrix_a, *matrix_l, *matrix_u, *matrix_a_inv;
   char *input_matrix_file = INPUT_MATRIX;
 
+  // Get Input Matrix
   if( !(matrix_length = get_input_matrix_length(input_matrix_file)) ) {
     printf("Failed Get Matrix Length from %s\n", input_matrix_file);
     goto end;
   }
 
   matrix_a = malloc_square_matrix(matrix_length);
-  if( !get_input_square_matrix(INPUT_MATRIX, matrix_a, matrix_length) ) {
+  if( !get_input_square_matrix_element(INPUT_MATRIX, matrix_a, matrix_length) ) {
     printf("Failed Get Input Matrix\n");
     goto end;
   }
@@ -28,13 +29,35 @@ int main(void) {
   print_matrix(matrix_a, matrix_length);
 #endif
 
+
+  // Calculate A = LU
   matrix_l = malloc_square_matrix(matrix_length);
   matrix_u = malloc_square_matrix(matrix_length);
   if( !get_lu_decomposition_matrix(matrix_a, matrix_l, matrix_u, matrix_length) ) {
     printf("Failed LU Decomposition\n");
     goto end;
   }
+#if DBG_PRINT_LU_MATRIX == 1
+  printf("Matrix L\n");
+  print_matrix(matrix_l, matrix_length);
 
+  printf("Matrix U\n");
+  print_matrix(matrix_u, matrix_length);
+#endif
+
+#if CHECK_LU_DECOMP_RESULT == 1
+  printf("Check LU = A or not ... ");
+  if ( !compare_matrix_multi (matrix_l, matrix_u, matrix_a, matrix_length) ) {
+    // Check LU = A or Not
+    printf("NG\n");
+    return 0;
+  }
+  printf("OK\n");
+  printf("\n");
+#endif
+
+
+  // Calculate U_UNV * L_INV = A_INV
   matrix_a_inv = malloc_square_matrix(matrix_length);
   if (!get_inverse_matrix_with_lu_decomp (matrix_l, matrix_u, matrix_a_inv, matrix_length) ) {
     printf("Failed Inverse MATRIX A\n");

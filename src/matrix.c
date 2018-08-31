@@ -2,6 +2,7 @@
 #include "matrix.h"
 #include <ctype.h>
 #include <math.h>
+#include <float.h>
 
 double *malloc_matrix_list[64] ={0};
 int malloc_matrix_cnt = 0;
@@ -171,7 +172,7 @@ int get_matrix_elements(double *matrix, char *input, int now_line, int matrix_le
 }
 
 
-int get_input_square_matrix (char *filename, double *matrix_a, int matrix_length) {
+int get_input_square_matrix_element (char *filename, double *matrix_a, int matrix_length) {
   FILE *fp;
   char buf[BUF_LEN];
   int now_line = 0;
@@ -226,7 +227,7 @@ int compare_matrix_multi (double *matrix_1, double *matrix_2, double *comp_matri
       for(int k = 0; k < matrix_length; k++)
 	sum += matrix_1[i * matrix_length + k] * matrix_2[k * matrix_length + j];
 
-      if(sum != comp_matrix[i * matrix_length + j]) {
+      if( fabs(sum - comp_matrix[i * matrix_length + j]) > DBL_EPSILON ) {
 	return 0;
       }
 

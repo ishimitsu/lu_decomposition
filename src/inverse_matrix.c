@@ -5,7 +5,7 @@ int check_matrix_is_inverse (double *matrix, double *matrix_inv, int matrix_leng
   double *matrix_e;
   int ret = 1;
 
-  matrix_e = calloc ( matrix_length * matrix_length, sizeof(int));
+  matrix_e = calloc ( matrix_length * matrix_length, sizeof(double));
 
   for(int i = 0; i < matrix_length; i++) {
     matrix_e[i * matrix_length + i] = 1;
@@ -14,12 +14,16 @@ int check_matrix_is_inverse (double *matrix, double *matrix_inv, int matrix_leng
   // Check A * A_INV = E 
   if ( !compare_matrix_multi (matrix, matrix_inv, matrix_e, matrix_length) ) {
     ret = 0;
+    goto end;
   }
 
   // Check A_INV * A = E 
   if ( !compare_matrix_multi (matrix_inv, matrix, matrix_e, matrix_length) ) {
     ret = 0;
+    goto end;
   }
+
+ end:
 
   free(matrix_e);
   

@@ -1,8 +1,40 @@
 #include "common.h"
 #include "matrix.h"
 
-int get_lu_decomposition_matrix(double *matrix_a, double *matrix_l, double *matrix_u, int matrix_length) {
+int select_pivot (double *matrix_a, int matrix_length) {
+  double max, change_line = 0;
+  double *temp;
+
+  temp = calloc ( matrix_length, sizeof(double) );  
+
+  for(int i = 0; i < matrix_length; i++) {
+    if(matrix_a[i * matrix_length + i] == 0) {
+      max = matrix_a[i * matrix_length];
+      change_line = 0;
+
+      for(int j = 0; i < matrix_length; i++) {
+	if(max < matrix_a[i * matrix_length + j]) {
+	  max = matrix_a[i * matrix_length + j];
+	  change_line = j;
+	}
+
+      }
+
+      
+
+    }
+  }
+  
+  return 1;
+}
+
+
+int get_lu_decomposition_matrix(double *matrix_a_base, double *matrix_l, double *matrix_u, int matrix_length) {
   double sum, pivot;
+  double *matrix_a;
+
+  matrix_a = calloc ( matrix_length * matrix_length, sizeof(double) );  
+  memcpy (matrix_a, matrix_a_base, matrix_length * matrix_length * sizeof(double));
 
   for(int i = 0; i < matrix_length; i++) {
 
@@ -16,7 +48,8 @@ int get_lu_decomposition_matrix(double *matrix_a, double *matrix_l, double *matr
 
 	pivot = matrix_u[j * matrix_length + j];
 	if(!pivot) {
-	  // need pivot selection
+	  // If U diagonal(i, i) = 0, need pivot selection to avoid 0 division
+	  // select_pivot (matrix_a, matrix_u, matrix_length);
 	  printf("U[%d %d] is 0, need pivot selection\n", j, j);
 	}
 
@@ -38,25 +71,8 @@ int get_lu_decomposition_matrix(double *matrix_a, double *matrix_l, double *matr
       
     }
   }
-      
-#if DBG_PRINT_LU_MATRIX == 1
-  printf("Matrix L\n");
-  print_matrix(matrix_l, matrix_length);
 
-  printf("Matrix U\n");
-  print_matrix(matrix_u, matrix_length);
-#endif
-
-#if CHECK_LU_DECOMP_RESULT == 1
-  printf("Check LU = A or not ... ");
-  if ( !compare_matrix_multi (matrix_l, matrix_u, matrix_a, matrix_length) ) {
-    // Check LU = A or Not
-    printf("NG\n");
-    return 0;
-  }
-  printf("OK\n");
-  printf("\n");
-#endif
+  free(matrix_a);
 
   return 1;
 }
