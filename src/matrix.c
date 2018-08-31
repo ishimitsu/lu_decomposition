@@ -2,7 +2,6 @@
 #include "matrix.h"
 #include <ctype.h>
 #include <math.h>
-#include <float.h>
 
 double *malloc_matrix_list[64] ={0};
 int malloc_matrix_cnt = 0;
@@ -227,7 +226,7 @@ int compare_matrix_multi (double *matrix_1, double *matrix_2, double *comp_matri
       for(int k = 0; k < matrix_length; k++)
 	sum += matrix_1[i * matrix_length + k] * matrix_2[k * matrix_length + j];
 
-      if( fabs(sum - comp_matrix[i * matrix_length + j]) > DBL_EPSILON ) {
+      if ( fabs(sum - comp_matrix[i * matrix_length + j]) > 0.000001) {
 	return 0;
       }
 
