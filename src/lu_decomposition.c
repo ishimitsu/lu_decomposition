@@ -4,37 +4,13 @@
 int select_pivot (double *matrix_a, int matrix_length) {
   double max, change_line = 0;
   double *temp;
-
-  temp = calloc ( matrix_length, sizeof(double) );  
-
-  for(int i = 0; i < matrix_length; i++) {
-    if(matrix_a[i * matrix_length + i] == 0) {
-      max = matrix_a[i * matrix_length];
-      change_line = 0;
-
-      for(int j = 0; i < matrix_length; i++) {
-	if(max < matrix_a[i * matrix_length + j]) {
-	  max = matrix_a[i * matrix_length + j];
-	  change_line = j;
-	}
-
-      }
-
-      
-
-    }
-  }
   
   return 1;
 }
 
 
-int get_lu_decomposition_matrix(double *matrix_a_base, double *matrix_l, double *matrix_u, int matrix_length) {
+int get_lu_decomposition_matrix(double *matrix_a, double *matrix_l, double *matrix_u, int matrix_length) {
   double sum, pivot;
-  double *matrix_a;
-
-  matrix_a = calloc ( matrix_length * matrix_length, sizeof(double) );  
-  memcpy (matrix_a, matrix_a_base, matrix_length * matrix_length * sizeof(double));
 
   for(int i = 0; i < matrix_length; i++) {
 
@@ -47,10 +23,11 @@ int get_lu_decomposition_matrix(double *matrix_a_base, double *matrix_l, double 
       if(i > j) {
 
 	pivot = matrix_u[j * matrix_length + j];
-	if(!pivot) {
+	if(fabs(pivot) < EPSILON) {
 	  // If U diagonal(i, i) = 0, need pivot selection to avoid 0 division
 	  // select_pivot (matrix_a, matrix_u, matrix_length);
-	  printf("U[%d %d] is 0, need pivot selection\n", j, j);
+	  printf("U[%d %d] is 0, pivot selection invalid\n", j, j);
+	  return 0;
 	}
 
 	// Low matrix Sum = L(i,1) * U(1,j) + ... + L(i, j-1) * U(j-1,j)
@@ -71,8 +48,6 @@ int get_lu_decomposition_matrix(double *matrix_a_base, double *matrix_l, double 
       
     }
   }
-
-  free(matrix_a);
 
   return 1;
 }

@@ -1,7 +1,5 @@
 #include "common.h"
 #include "matrix.h"
-#include <ctype.h>
-#include <math.h>
 
 double *malloc_matrix_list[64] ={0};
 int malloc_matrix_cnt = 0;
@@ -215,6 +213,54 @@ int get_input_square_matrix_element (char *filename, double *matrix_a, int matri
   return ret;
 }
 
+
+// For pivot selection, make permulation matrix P
+int pivot_selection (double *matrix_a, double *matrix_p, int matrix_length) {
+  double max;
+  double *temp;
+  int swap;
+
+  temp = calloc(matrix_length, sizeof(double));
+  for(int i = 0; i < matrix_length; i++) {
+    matrix_p[i * matrix_length + i] = 1;
+  }
+
+  for(int i = 0; i < matrix_length; i++) {
+
+    // Check pivot selection need or not
+    max = matrix_a[i * matrix_length + i];
+    swap = i;
+    for(int j = i; j < matrix_length; j++) {
+      if(max < matrix_a[i * matrix_length + j]) {
+	max = matrix_a[i * matrix_length + j];
+	swap = j;
+      }
+    }
+
+/*     if(max == 0.0L) { */
+/*       printf("Max pivot [%f], Can't select pivot\n", max); */
+/*       return 0; */
+/*     } */
+
+    if(swap != i) {
+      memcpy(temp, &matrix_a[i * matrix_length * i], matrix_length * sizeof(double));
+      memcpy(&matrix_a[i * matrix_length], &matrix_a[swap * matrix_length], matrix_length * sizeof(double));
+      memcpy(&matrix_a[swap * matrix_length], temp, matrix_length * sizeof(double));
+
+      memcpy(temp, &matrix_p[i * matrix_length * i], matrix_length * sizeof(double));
+      memcpy(&matrix_p[i * matrix_length], &matrix_p[swap * matrix_length], matrix_length * sizeof(double));
+      memcpy(&matrix_p[swap * matrix_length], temp, matrix_length * sizeof(double));
+    }
+    
+  }
+
+  free(temp);
+
+  return 1;
+}
+
+
+
 // Check M1 * M2 = Comp_M or not
 int compare_matrix_multi (double *matrix_1, double *matrix_2, double *comp_matrix, int matrix_length) {
   double sum = 0;
@@ -226,7 +272,7 @@ int compare_matrix_multi (double *matrix_1, double *matrix_2, double *comp_matri
       for(int k = 0; k < matrix_length; k++)
 	sum += matrix_1[i * matrix_length + k] * matrix_2[k * matrix_length + j];
 
-      if ( fabs(sum - comp_matrix[i * matrix_length + j]) > 0.000001) {
+      if ( fabs(sum - comp_matrix[i * matrix_length + j]) > EPSILON) {
 	return 0;
       }
 
