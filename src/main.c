@@ -41,9 +41,6 @@ int main(void) {
     goto end;
   }
 
-  printf("PA\n");
-  print_matrix(matrix_a, matrix_length);
-
   // Calculate PA = LU
   matrix_l = malloc_square_matrix(matrix_length);
   matrix_u = malloc_square_matrix(matrix_length);
@@ -69,7 +66,6 @@ int main(void) {
   printf("OK\n");
   printf("\n");
 #endif
-
 
   // Calculate U_UNV * L_INV * P = A_INV
   matrix_a_inv = malloc_square_matrix(matrix_length);

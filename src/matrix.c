@@ -231,23 +231,24 @@ int pivot_selection (double *matrix_a, double *matrix_p, int matrix_length) {
     max = matrix_a[i * matrix_length + i];
     swap = i;
     for(int j = i; j < matrix_length; j++) {
-      if(max < matrix_a[i * matrix_length + j]) {
-	max = matrix_a[i * matrix_length + j];
+      if(fabs(matrix_a[j * matrix_length + i] - max) > 0.0L) {
+	max = matrix_a[j * matrix_length + i];
 	swap = j;
       }
     }
 
-/*     if(max == 0.0L) { */
-/*       printf("Max pivot [%f], Can't select pivot\n", max); */
-/*       return 0; */
-/*     } */
+    if(fabs(max) < EPSILON) {
+      printf("Max pivot [%f], Can't select pivot\n", max);
+      return 0;
+    }
 
     if(swap != i) {
-      memcpy(temp, &matrix_a[i * matrix_length * i], matrix_length * sizeof(double));
+      printf("Change %d <-> %d, max %f\n", i, swap, max);
+      memcpy(temp, &matrix_a[i * matrix_length], matrix_length * sizeof(double));
       memcpy(&matrix_a[i * matrix_length], &matrix_a[swap * matrix_length], matrix_length * sizeof(double));
       memcpy(&matrix_a[swap * matrix_length], temp, matrix_length * sizeof(double));
 
-      memcpy(temp, &matrix_p[i * matrix_length * i], matrix_length * sizeof(double));
+      memcpy(temp, &matrix_p[i * matrix_length], matrix_length * sizeof(double));
       memcpy(&matrix_p[i * matrix_length], &matrix_p[swap * matrix_length], matrix_length * sizeof(double));
       memcpy(&matrix_p[swap * matrix_length], temp, matrix_length * sizeof(double));
     }
