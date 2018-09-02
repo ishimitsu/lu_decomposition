@@ -1,5 +1,5 @@
 # このプログラムについて
-このプログラムは、任意の正方行列を入力として、LU分解によりその逆行列を求めます。
+このプログラムは、任意の正方行列を入力として、LU分解によりその逆行列を求め、出力する。
 
 # 使い方
 1. 本プログラムをダウンロードする
@@ -29,14 +29,14 @@ Inversed A Matrix   -> 入力された正方行列Aに対し、算出された�
 Check A * A_INV = A_INV * A = E ... OK -> 算出された結果が逆行列であるかを確認
 ```
 
-# LU分解による逆行列の求め方
+# 本プログラムにおける、LU分解~逆行列算出までの流れ
 本プログラムは、以下の順序で逆行列を求めている
 1. 入力された行列をAとする
-2. A = PA によるピボット選択を行う
-Aの成分によっては、後述のLU分解/逆行列の算出にて、0除算が発生する可能性がある (Aの全対角成分が0の時など)。
-これを回避するため、ピボット選択(行の交換)を行い、行交換を行ったA (A_PV)、及び交換した行を記憶した置換行列Pを生成する
-3. PA = LU を求める (LU分解)
-PAを、以下の例のようにL(下三角行列)、U(上三角行列)に分解する。
+2. A = PA によるピボット選択を行う  
+Aの成分によっては、後述のLU分解/逆行列の算出にて、0除算が発生する可能性がある (Aの全対角成分が0の時など)。  
+これを回避するため、ピボット選択(行の交換)を行い、行交換を行ったA (A_PV)、及び交換した行を記憶した置換行列Pを生成する。
+3. PA = LU を求める (LU分解)  
+PAを、以下の例のようにL(下三角行列)、U(上三角行列)に分解する。  
 <img src="https://latex.codecogs.com/gif.latex?\begin{bmatrix}&space;a11&space;&a12&space;&a13&space;\\&space;a21&space;&a22&space;&a23&space;\\&space;a31&space;&a32&space;&a33&space;\end{bmatrix}&space;=&space;\begin{bmatrix}&space;1&space;&0&space;&0&space;\\&space;l21&space;&1&space;&0&space;\\&space;l31&space;&l32&space;&1&space;\end{bmatrix}&space;\begin{bmatrix}&space;u11&space;&u12&space;&u13&space;\\&space;0&space;&u22&space;&u23&space;\\&space;0&space;&0&space;&u33&space;\end{bmatrix}" />
 
 Aがn次の場合、LUの各成分は以下のように求める。
@@ -51,14 +51,14 @@ Aがn次の場合、LUの各成分は以下のように求める。
 
 <img src="https://latex.codecogs.com/gif.latex?u_{ij}=a_{ij}-\sum_{k=1}^{i-1}l_{ik}u_{kj}}{u_{ij}&space;\&space;\&space;(i\leq&space;j)&space;\\">
 
-<img src="https://latex.codecogs.com/gif.latex?l_{ij}=0&space;\&space;\&space;(i\leq&space;j)&space;\\">
+<img src="https://latex.codecogs.com/gif.latex?l_{ij}=0&space;\&space;\&space;(i<j)&space;\\">
 
 <img src="https://latex.codecogs.com/gif.latex?\par&space;\&space;\&space;\}\par&space;\}">
 
-4. Aの逆行列 = Uの逆行列 * Lの逆行列 * 置換行列P を求める (Aの逆行列の算出)
+4. L、Uの逆行列を求める  
 L(下三角行列)、U(上三角行列)の逆行列の各成分を、以下のように求める。
 
-- L(下三角行列)の逆行列
+- L(下三角行列)の逆行列  
 <img src="https://latex.codecogs.com/gif.latex?\par&space;for&space;i=1,2...n\{">
 
 <img src="https://latex.codecogs.com/gif.latex?\par&space;\&space;\&space;for&space;j=1,2...i-1\{">
@@ -71,8 +71,7 @@ L(下三角行列)、U(上三角行列)の逆行列の各成分を、以下の�
 
 <img src="https://latex.codecogs.com/gif.latex?\par&space;\}">
 
-- U(上三角行列)の逆行列
-
+- U(上三角行列)の逆行列  
 <img src="https://latex.codecogs.com/gif.latex?\par&space;for&space;i=n,n-1...1\{">
 
 <img src="https://latex.codecogs.com/gif.latex?u_{ij}^{'}=\frac{1}{u_{ii}}">
@@ -83,8 +82,9 @@ L(下三角行列)、U(上三角行列)の逆行列の各成分を、以下の�
 
 <img src="https://latex.codecogs.com/gif.latex?\par&space;\&space;\&space;\}\par&space;\}">
 
-
-Uの逆行列 * Lの逆行列 * 置換行列P から、最終的にAの逆行列が求められる。
+5. Aの逆行列を求める  
+L、Uの逆行列から、以下の式を求めることで、Aの逆行列を算出/標準出力する。
+<img src="https://latex.codecogs.com/gif.latex?\par&space;PA=LU\par&space;A^{-1}=(LU)^{-1}P&space;=&space;U^{-1}L^{-1}P">
 
 # プログラムの内部動作
 
@@ -95,8 +95,8 @@ Makefile                  : 本プログラムのビルド用Makefile
 input_matrix.txt          : 本プログラムへの入力値となる、行列の次数/成分
 test_pattern              : ピボット選択が必要である入力行列等、本プログラムのテスト用行列パターンを格納。本プログラムは使用しない
 lu_decomposition          : 本プログラムの実行バイナリ
-src - common.h            : 本プログラムのデバッグ出力を指定可能。LU分解/逆行列の算出結果の表示、算出結果の検証実行の有無を指定可能
-    - inverse_matrix.c    : 分解されたLUの逆行列を求めるプログラム
+src - common.h            : 本プログラムのデバッグメッセージ出力を指定可能 (LU分解/逆行列の算出結果の表示、算出結果の検証テストの実施)
+    - inverse_matrix.c    : 分解されたLUそれぞれの逆行列を求め、最終的にAの逆行列を算出するプログラム
     - lu_decomposition.c  : LU分解を実施するプログラム
     - matrix.c/h          : 行列操作に関するプログラム (input_matrix.txtからの入力行列Aの読み込み、ピボット選択、行列比較など)
     - main.c              : 本プログラムのmain()プログラム
