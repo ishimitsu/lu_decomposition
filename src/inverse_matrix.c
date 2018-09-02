@@ -74,8 +74,8 @@ int get_lu_inverse_matrix (double *matrix_l, double *matrix_u, double *matrix_l_
 
     pivot = matrix_u[i * matrix_length + i];
     if(fabs(pivot) < EPSILON) {
-      // if U diagonal element = 0
-      printf("U[%d %d] is 0, pivot selection invalid\n", i, i);
+      // If U diagonal(i, i) = 0, can't select pivot
+      printf("U[%d %d] is %f, if U %d row all elements are 0, U can't be inversed\n", i, i, pivot, i);
       return 0;
     }
 
