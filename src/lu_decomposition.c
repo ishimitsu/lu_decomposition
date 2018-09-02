@@ -25,8 +25,7 @@ int get_lu_decomposition_matrix(double *matrix_a, double *matrix_l, double *matr
 	pivot = matrix_u[j * matrix_length + j];
 	if(fabs(pivot) < EPSILON) {
 	  // If U diagonal(i, i) = 0, need pivot selection to avoid 0 division
-	  // select_pivot (matrix_a, matrix_u, matrix_length);
-	  printf("U[%d %d] is 0, pivot selection invalid\n", j, j);
+	  printf("U[%d %d] is %f, pivot selection invalid\n", j, j, pivot);
 	  return 0;
 	}
 

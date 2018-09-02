@@ -41,6 +41,11 @@ int main(void) {
     goto end;
   }
 
+#if DBG_PRINT_MATRIX_PVT_SELECT == 1
+  printf("Matrix A = PA\n");
+  print_matrix(matrix_a, matrix_length);
+#endif
+
   // Calculate PA = LU
   matrix_l = malloc_square_matrix(matrix_length);
   matrix_u = malloc_square_matrix(matrix_length);
@@ -64,7 +69,6 @@ int main(void) {
     goto end;
   }
   printf("OK\n");
-  printf("\n");
 #endif
 
   // Calculate U_UNV * L_INV * P = A_INV
