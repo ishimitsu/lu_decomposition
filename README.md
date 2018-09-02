@@ -37,15 +37,52 @@ Aの成分によっては、後述のLU分解/逆行列の算出にて、0除算
 これを回避するため、ピボット選択(行の交換)を行い、行交換を行ったA (A_PV)、及び交換した行を記憶した置換行列Pを生成する
 3. PA = LU を求める (LU分解)
 PAを、以下の例のようにL(下三角行列)、U(上三角行列)に分解する。
-```
-| a11 a22 a13 |   | 1   0   0 | u11 u12 u13 |
-| a21 a22 a23 | = | l21 1   0 |  0  u22 u23 |
-| a31 a32 a33 |   | l31 l32 1 |  0   0  u33 |
-```
+<img src="https://latex.codecogs.com/gif.latex?\begin{bmatrix}&space;a11&space;&a12&space;&a13&space;\\&space;a21&space;&a22&space;&a23&space;\\&space;a31&space;&a32&space;&a33&space;\end{bmatrix}&space;=&space;\begin{bmatrix}&space;1&space;&0&space;&0&space;\\&space;l21&space;&1&space;&0&space;\\&space;l31&space;&l32&space;&1&space;\end{bmatrix}&space;\begin{bmatrix}&space;u11&space;&u12&space;&u13&space;\\&space;0&space;&u22&space;&u23&space;\\&space;0&space;&0&space;&u33&space;\end{bmatrix}" />
+
 Aがn次の場合、LUの各成分は以下のように求める。
 
+<img src="https://latex.codecogs.com/gif.latex?\par&space;for&space;i=1,2...n\{\par&space;\&space;\&space;for&space;j=1,2...n\{">
+
+<img src="https://latex.codecogs.com/gif.latex?l_{ij}=\frac{a_{ij}-\sum_{k=1}^{j-1}l_{ik}u_{kj}}{u_{ij}}&space;\&space;\&space;(i>j)">
+
+<img src="https://latex.codecogs.com/gif.latex?u_{ij}=0&space;\&space;\&space;(i>j)&space;\\">
+
+<img src="https://latex.codecogs.com/gif.latex?l_{ij}=1&space;\&space;\&space;(i=j)&space;\\">
+
+<img src="https://latex.codecogs.com/gif.latex?u_{ij}=a_{ij}-\sum_{k=1}^{i-1}l_{ik}u_{kj}}{u_{ij}&space;\&space;\&space;(i\leq&space;j)&space;\\">
+
+<img src="https://latex.codecogs.com/gif.latex?l_{ij}=0&space;\&space;\&space;(i\leq&space;j)&space;\\">
+
+<img src="https://latex.codecogs.com/gif.latex?\par&space;\&space;\&space;\}\par&space;\}">
+
 4. Aの逆行列 = Uの逆行列 * Lの逆行列 * 置換行列P を求める (Aの逆行列の算出)
-L(下三角行列)、U(上三角行列)の逆行列の各成分、以下のように求める。
+L(下三角行列)、U(上三角行列)の逆行列の各成分を、以下のように求める。
+
+- L(下三角行列)の逆行列
+<img src="https://latex.codecogs.com/gif.latex?\par&space;for&space;i=1,2...n\{">
+
+<img src="https://latex.codecogs.com/gif.latex?\par&space;\&space;\&space;for&space;j=1,2...i-1\{">
+
+<img src="https://latex.codecogs.com/gif.latex?l_{ij}^{'}=\frac{-\sum_{k=j}^{i-1}l_{ik}l_{kj}^{'}}{l_{ii}}">
+
+<img src="https://latex.codecogs.com/gif.latex?\par&space;\&space;\&space;\}">
+
+<img src="https://latex.codecogs.com/gif.latex?l_{ij}^{'}=\frac{1}{l_{ii}}">
+
+<img src="https://latex.codecogs.com/gif.latex?\par&space;\}">
+
+- U(上三角行列)の逆行列
+
+<img src="https://latex.codecogs.com/gif.latex?\par&space;for&space;i=n,n-1...1\{">
+
+<img src="https://latex.codecogs.com/gif.latex?u_{ij}^{'}=\frac{1}{u_{ii}}">
+
+<img src="https://latex.codecogs.com/gif.latex?\par&space;\&space;\&space;for&space;j=n,n-1...i+1\{">
+
+<img src="https://latex.codecogs.com/gif.latex?u_{ij}^{'}=\frac{-\sum_{k=i&plus;1}^{j}u_{ik}u_{kj}^{'}}{u_{ii}}">
+
+<img src="https://latex.codecogs.com/gif.latex?\par&space;\&space;\&space;\}\par&space;\}">
+
 
 Uの逆行列 * Lの逆行列 * 置換行列P から、最終的にAの逆行列が求められる。
 
@@ -65,10 +102,10 @@ src - common.h            : 本プログラムのデバッグ出力を指定可�
     - main.c              : 本プログラムのmain()プログラム
 ```
 # TODO
-- メモリ消費の削減
+- メモリ消費の削減  
 行列A, 置換行列P, ピボット選択されたA、下上三角行列LP、逆行列A/L/Uそれぞれで、行列処理のため"double * n次 * n次"分のメモリ確保を行なっている。
 流石にメモリを消費しすぎのため、LUを1つのn次行列にまとめる等の対応が必要
-- 行列成分の分数管理
+- 行列成分の分数管理  
 現在、行列の各成分はdouble型で管理している。
 LU分解や逆行列の算出にて、割り切れない除算が発生した場合、算出した逆行列の成分として循環小数得られる。
 この場合、逆行列であるかの確認、"A * 循環小数含む逆行列A = E"が正確に求められない。
